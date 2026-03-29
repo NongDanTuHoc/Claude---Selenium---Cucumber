@@ -1,0 +1,74 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Gradle
+.gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+*.locks
+*.log
+!.mvn/wrapper/maven-wrapper.jar
+
+# Eclipse / VS Code
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+.vscode/
+nbproject/private/
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Reports & Screenshots (regenerate on each run)
+reports/
+logs/
+*.html
+*.json
+*.xml
+!src/test/resources/suites/*.xml
+!src/test/resources/features/**/*.xml
+
+# Test output
+test-output/
+surefire-reports/
+failsafe-reports/
+cucumber-html-reports/
+spark-output/
+
+# Config secrets (never commit real credentials)
+config/env/*.local.properties
+**/credentials.properties
+**/secrets.yaml
+
+# Docker volumes
+docker/selenium-grid/**/node-data/
+docker/selenium-grid/**/hub-data/
+
+# Maven wrapper (keep the jar)
+!.mvn/wrapper/maven-wrapper.jar

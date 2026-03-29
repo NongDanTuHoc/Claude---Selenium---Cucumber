@@ -1,0 +1,106 @@
+name: Automation Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    name: Run Tests (${{ matrix.env }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        env: [dev, staging]
+        include:
+          - env: dev
+            cucumber_tags: "@smoke"
+          - env: staging
+            cucumber_tags: "@smoke or @regression"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2-
+
+      - name: Run Cucumber tests
+        run: |
+          mvn test \
+            -Denv=${{ matrix.env }} \
+            -Dcucumber.filter.tags="${{ matrix.cucumber_tags }}" \
+            -q
+
+      - name: Upload ExtentReports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: extent-report-${{ matrix.env }}
+          path: reports/extent/*.html
+          retention-days: 14
+
+      - name: Upload Cucumber HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cucumber-report-${{ matrix.env }}
+          path: reports/cucumber/*.html
+          retention-days: 14
+
+      - name: Upload Cucumber JSON Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cucumber-json-${{ matrix.env }}
+          path: reports/cucumber/*.json
+          retention-days: 14
+
+      - name: Upload TestNG XML Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: testng-results-${{ matrix.env }}
+          path: reports/test-output/testng-results.xml
+          retention-days: 14
+
+      - name: Upload Failure Screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-screenshots-${{ matrix.env }}
+          path: reports/test-output/screenshots/*.png
+          retention-days: 14
+
+  # Optional: run against a live staging environment via API test
+  api-tests:
+    name: API Smoke Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run API-only tests
+        run: mvn test -Denv=staging -DsuiteXmlFile=src/test/resources/suites/smoke.xml -q
+        continue-on-error: true

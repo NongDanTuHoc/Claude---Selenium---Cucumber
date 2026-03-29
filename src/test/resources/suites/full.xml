@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Full Automation Suite" parallel="methods" thread-count="8" configfailurepolicy="continue">
+
+    <listeners>
+        <listener class-name="com.company.automation.listeners.TestNGSuiteListener"/>
+        <listener class-name="com.company.automation.listeners.TestNGMethodListener"/>
+    </listeners>
+
+    <!-- Cucumber feature runner -->
+    <test name="Cucumber Features" allow-return-values="false">
+        <classes>
+            <class name="com.company.automation.runner.CucumberRunner"/>
+        </classes>
+    </test>
+
+    <!-- Page object tests -->
+    <test name="Page Object Tests">
+        <packages>
+            <package name="com.company.automation.pages.*"/>
+            <package name="com.company.automation.api.*"/>
+            <package name="com.company.automation.db.*"/>
+        </packages>
+    </test>
+
+</suite>

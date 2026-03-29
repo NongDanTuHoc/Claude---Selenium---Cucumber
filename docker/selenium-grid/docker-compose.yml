@@ -1,0 +1,76 @@
+version: "3.9"
+
+services:
+  selenium-hub:
+    image: selenium/hub:4.23.0
+    container_name: selenium-hub
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
+    environment:
+      SE_SESSION_REQUEST_TIMEOUT: 300
+      SE_SESSION_QUIET_TIMEOUT: 300
+      SE_DRAIN_OLD_SESSIONS_ENABLED: "true"
+      SE_VNC_VIEW_ONLY: "false"
+    volumes:
+      - ./selenium-hub-config.json:/opt/selenium/config.json:ro
+      - hub-data:/home/seluser
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4444/wd/hub/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - selenium-grid
+
+  chrome-node:
+    image: selenium/node-chrome:4.23.0
+    container_name: chrome-node
+    depends_on:
+      selenium-hub:
+        condition: service_healthy
+    shm_size: '2gb'
+    environment:
+      SE_EVENT_BUS_SUB: "tcp://selenium-hub:4442"
+      SE_SESSION_QUIET_TIMEOUT: 300
+      SE_NODE_MAX_SESSIONS: 2
+      SCREENINESS: "1920x1080x24"
+      SE_VNC_VIEW_ONLY: "true"
+    ports:
+      - "5900:5900"
+    volumes:
+      - /dev/shm:/dev/shm
+      - node-data:/tmp
+    networks:
+      - selenium-grid
+
+  firefox-node:
+    image: selenium/node-firefox:4.23.0
+    container_name: firefox-node
+    depends_on:
+      selenium-hub:
+        condition: service_healthy
+    shm_size: '2gb'
+    environment:
+      SE_EVENT_BUS_SUB: "tcp://selenium-hub:4442"
+      SE_SESSION_QUIET_TIMEOUT: 300
+      SE_NODE_MAX_SESSIONS: 1
+      SCREENINESS: "1920x1080x24"
+      SE_VNC_VIEW_ONLY: "true"
+    ports:
+      - "5901:5900"
+    volumes:
+      - /dev/shm:/dev/shm
+      - node-data:/tmp
+    networks:
+      - selenium-grid
+
+volumes:
+  selenium-hub:
+  node-data:
+
+networks:
+  selenium-grid:
+    driver: bridge
